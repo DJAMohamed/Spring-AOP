@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<!-- Activation des annotations @Aspect, @Pointcut, @Before, ... -->
+	<aop:aspectj-autoproxy/>
+
+	<!-- Activation des annotations @Component, @Autowired, @Qualifier, ... -->
+	<!-- Optionnel si <context:component-scan> présent -->
+	<context:annotation-config/>
+	
+	<!-- Package dans lesquels il va scanner pour trouver des annotations -->
+	<context:component-scan base-package="m2i.formation.spring"/>
+
+	<bean id="guitare" class="m2i.formation.spring.Guitare" />
+	
+	<bean id="ukulele" class="m2i.formation.spring.Ukulele" />
+	
+	<bean id="guitariste" class="m2i.formation.spring.Guitariste" init-method="afterInjection">
+		<property name="instrument" ref="guitare"/>
+	</bean>
+	
+	<bean id="spectateur" class="m2i.formation.spring.Spectateur"/>
+	
+	<aop:config>
+		<aop:pointcut expression="execution(public * *.jouer())" id="jouerPointcut"/>
+		<aop:aspect ref="spectateur">
+			<aop:around method="assoir" pointcut-ref="jouerPointcut"/>
+			<aop:after-returning method="applaudir" pointcut-ref="jouerPointcut"/>
+			<aop:after-throwing method="rembourser" pointcut-ref="jouerPointcut" throwing="ex"/>
+		</aop:aspect>
+	</aop:config>
+	
+	<bean class="m2i.formation.spring.CustomLog"/>
+</beans>
